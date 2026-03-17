@@ -1,63 +1,49 @@
+import pytest
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-import time
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
-# Setup WebDriver
-driver = webdriver.Chrome()
-
-try:
-    # Step 1: Open Website (ERROR: wrong URL)
-    driver.get("https://www.saucedemoo.com/")
-    time.sleep(2)
-
-    # Step 2: Login (ERROR: wrong locator ID)
-    driver.find_element(By.ID, "username").send_keys("standard_user")
-    driver.find_element(By.ID, "password").send_keys("secret_sauce")
-
-    # ERROR: missing click on login button
-
-    time.sleep(2)
-
-    # Step 3: Add to Cart (ERROR: wrong element ID)
-    driver.find_element(By.ID, "add-to-cart-backpack").click()
-    print("Product added to cart")
-
-    time.sleep(2)
-
-    # Step 4: Go to Cart (ERROR: wrong locator type)
-    driver.find_element(By.ID, "shopping_cart_link").click()
-
-    time.sleep(2)
-
-    # Step 5: Checkout (ERROR: wrong button ID)
-    driver.find_element(By.ID, "checkot").click()
-
-    time.sleep(2)
-
-    # Step 6: Enter Checkout Details (ERROR: wrong field IDs)
-    driver.find_element(By.ID, "firstname").send_keys("Sai")
-    driver.find_element(By.ID, "lastname").send_keys("Lakshmi")
-    driver.find_element(By.ID, "zipcode").send_keys("500010")
-
-    # ERROR: missing continue button click
-
-    time.sleep(2)
-
-    # Step 7: Finish Order (ERROR: element not visible yet)
-    driver.find_element(By.ID, "finish").click()
-
-    time.sleep(2)
-
-    # Step 8: Order Confirmation (ERROR: wrong class name)
-    confirmation_text = driver.find_element(By.CLASS_NAME, "complete-text").text
-
-    if "Order successful" in confirmation_text:
-        print("Order placed successfully!")
-    else:
-        print("Order failed!")
-
-except Exception as e:
-    print("Error occurred:", e)
-
-finally:
+@pytest.fixture
+def driver():
+    driver = webdriver.Chrome()
+    driver.maximize_window()
+    yield driver
     driver.quit()
+
+
+def test_checkout_happy_path(driver):
+    wait = WebDriverWait(driver, 10)
+
+    # Step 1: Open Website
+    driver.get("https://www.saucedemo.com/")
+
+    # Step 2: Login
+    wait.until(EC.visibility_of_element_located((By.ID, "user-name"))).send_keys("standard_user")
+    driver.find_element(By.ID, "password").send_keys("secret_sauce")
+    driver.find_element(By.ID, "login-button").click()
+
+    # Step 3: Add product to cart
+    wait.until(EC.element_to_be_clickable((By.ID, "add-to-cart-sauce-labs-backpack"))).click()
+
+    # Step 4: Go to cart
+    driver.find_element(By.CLASS_NAME, "shopping_cart_link").click()
+
+    # Step 5: Checkout
+    wait.until(EC.element_to_be_clickable((By.ID, "checkout"))).click()
+
+    # Step 6: Enter details
+    wait.until(EC.visibility_of_element_located((By.ID, "first-name"))).send_keys("Sai")
+    driver.find_element(By.ID, "last-name").send_keys("Lakshmi")
+    driver.find_element(By.ID, "postal-code").send_keys("500010")
+    driver.find_element(By.ID, "continue").click()
+
+    # Step 7: Finish order
+    wait.until(EC.element_to_be_clickable((By.ID, "finish"))).click()
+
+    # Step 8: Verify confirmation
+    confirmation_text = wait.until(
+        EC.visibility_of_element_located((By.CLASS_NAME, "complete-header"))
+    ).text
+
+    assert "THANK YOU FOR YOUR ORDER" in confirmation_text
