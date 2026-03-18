@@ -1,0 +1,5 @@
+selenium>=4.0.0
+pytest>=6.0.0
+requests
+
+# Note: ChromeDriver must be installed and compatible with local Chrome version
