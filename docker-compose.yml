@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  selenium-tests:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: selenium-test-runner
+    environment:
+      - HEADLESS=true
+      - BROWSER=chrome
+      - ENVIRONMENT=docker
+      - LOG_LEVEL=INFO
+    volumes:
+      - ./logs:/app/logs
+      - ./screenshots:/app/screenshots
+      - ./reports:/app/reports
+    networks:
+      - test-network
+    restart: "no"
+
+  # Optional: Selenium Grid Hub (for distributed testing)
+  selenium-hub:
+    image: selenium/hub:latest
+    container_name: selenium-hub
+    ports:
+      - "4444:4444"
+      - "4442:4442"
+      - "4443:4443"
+    networks:
+      - test-network
+
+  # Optional: Chrome Node
+  chrome:
+    image: selenium/node-chrome:latest
+    container_name: selenium-chrome
+    environment:
+      - SE_EVENT_BUS_HOST=selenium-hub
+      - SE_EVENT_BUS_PUBLISH_PORT=4442
+      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+    depends_on:
+      - selenium-hub
+    networks:
+      - test-network
+
+networks:
+  test-network:
+    driver: bridge

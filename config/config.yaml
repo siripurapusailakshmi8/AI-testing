@@ -1,0 +1,62 @@
+# Application Configuration
+
+# Browser Settings
+browser:
+  type: chrome  # chrome, firefox
+  headless: false
+  window_width: 1920
+  window_height: 1080
+  wait_timeout: 10
+  implicit_wait: 5
+  page_load_timeout: 15
+
+# URLs
+urls:
+  base_url: https://www.saucedemo.com/
+  login_url: https://example.com/login
+  faq_url: https://example.com/faq
+
+# Test Credentials
+credentials:
+  username: standard_user
+  password: secret_sauce
+
+# Test Data
+test_data:
+  first_name: Sai
+  last_name: Lakshmi
+  postal_code: "500010"
+  email: test@example.com
+  phone: "1234567890"
+
+# Logging Configuration
+logging:
+  level: INFO
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file: logs/test_automation.log
+  max_bytes: 10485760  # 10 MB
+  backup_count: 5
+
+# Reporting
+reporting:
+  generate_html: true
+  generate_xml: true
+  screenshots_on_failure: true
+  video_recording: false
+  report_path: reports/
+
+# Retry Configuration
+retry:
+  max_attempts: 3
+  wait_time: 2  # seconds
+
+# Timeouts (in seconds)
+timeouts:
+  short: 5
+  medium: 10
+  long: 30
+  very_long: 60
+
+# Environment
+environment: staging
+debug: false
